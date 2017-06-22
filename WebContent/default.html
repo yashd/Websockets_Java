@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Websocket Implementation</title>
+
+<style>
+	
+.close {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+	
+</style>
+
+</head>
+<body>
+	<h2>
+		Welcome to websockets
+		<h2>
+
+			<form onsubmit="sendMessage()"">
+
+				<input id="textMessage" type="text"> <br> <input
+					value="send_message" onclick="sendMessage()" type="button" />
+			</form>
+
+			<br>
+			<textarea id="messageArea" rows="10" cols="50"></textarea>
+            	<br>
+          <button  onclick="processClose()" name ="Close Session" value="close"  class="close">Close Session </button>
+
+			<script type="text/javascript">
+				var websocket = new WebSocket("ws://localhost:8080/websockets_prac/server");
+				var messageTextArea = document.getElementById("messageArea");
+				
+				websocket.onopen = function(event) {
+					processOpen(event);
+					
+				};
+			   websocket.onmessage = function(event) {
+					processMessage(event);
+				};
+				  
+				//websocket.onMessage =processMessage();
+				
+				
+				websocket.onclose = function(event) {
+					processClose(event);
+				};
+				websocket.onError = function(event) {
+					processError(event);
+				};
+				function processOpen(event) {
+					var value = messageTextArea.value;
+					value += "Connecting Server..." + "\n";
+					console.log(value);
+					messageTextArea.value = value;
+				}
+
+				function processMessage(event) {
+					console.log("Reached Here");
+					var value = messageTextArea.value;
+					console.log(event.data);
+					value += "Message received from server==>"+ event.data + "\n";
+					messageTextArea.value = value;
+
+				}
+				function sendMessage() {
+
+					console.log(textMessage.value);
+
+					if (textMessage.value != "close") {
+
+						var value = messageTextArea.value;
+                    	var new_msg=websocket.send(textMessage.value);
+						value += "Mesage sent to server" + textMessage.value+ "\n";
+						textMessage.value = "";
+						messageTextArea.value = value;
+					} else {
+						websocket.close();
+					}
+				}
+				function processClose() {
+					var value = messageTextArea.value;
+                	value += "Client Disconnected...." + "\n";
+					messageTextArea.value = value;
+					websocket.close();
+					
+				}
+
+				function processError() {
+					messageTextArea += "Error...." + "\n";
+				}
+			</script>
+</body>
+</html>
